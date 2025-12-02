@@ -6,7 +6,7 @@ public class AgentAStar_sc : MonoBehaviour {
     public float replanInterval = 2.0f;
     public float waypointReachDistance = 0.15f; 
 
-    private List<Node_sc> currentPath; // Gizmo için buna dışarıdan erişmemiz lazım
+    private List<Node_sc> currentPath;
     private int pathIndex = 0;
     private float lastReplanTime = 0;
     private bool isFollowingPath = false;
@@ -20,7 +20,7 @@ public class AgentAStar_sc : MonoBehaviour {
         lastReplanTime = 0; 
     }
 
-    // Gizmos çizimi için Path'i Brain'e gönderen fonksiyon
+
     public List<Node_sc> GetCurrentPath() {
         return currentPath;
     }

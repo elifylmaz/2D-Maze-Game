@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// A* algoritması için grid düğümü
-/// Her hücre bir Node_sc'dir
-/// </summary>
 public class Node_sc {
     public bool isWalkable;      // Geçilebilir mi?
     public Vector3 worldPosition; // Dünya pozisyonu

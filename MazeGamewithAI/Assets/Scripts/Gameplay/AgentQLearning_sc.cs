@@ -40,7 +40,7 @@ public class AgentQLearning_sc : MonoBehaviour {
     Vector2 GetActionVector(int a) { return a == 0 ? Vector2.up : (a == 1 ? Vector2.down : (a == 2 ? Vector2.left : Vector2.right)); }
 
     void LoadBestQTable() { 
-        string path = Application.dataPath + "/Scripts/qtable_best.json"; // Dosya adına dikkat
+        string path = Application.dataPath + "/Scripts/qtable_best.json"; 
         if (!File.Exists(path)) path = Application.dataPath + "/Scripts/qtable_save.json";
 
         if (File.Exists(path)) {

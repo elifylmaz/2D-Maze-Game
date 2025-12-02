@@ -18,7 +18,6 @@ public class HierarchicalBrain_sc : MonoBehaviour {
     public float stuckThreshold = 0.8f;
     public float layerLockoutTime = 2.0f;
     
-    // Alt Modüller (Elle eklediğin scriptleri buradan çekeceğiz)
     private AgentPerceptron_sc perceptron;
     private AgentAStar_sc astar;
     private AgentQLearning_sc qlearning;
@@ -51,16 +50,16 @@ public class HierarchicalBrain_sc : MonoBehaviour {
     public Vector2 mapMax = new Vector2(8, 4);
 
     void Start() {
-        // Bileşenleri al (Eğer elle eklemediysen burada hata alabilirsin, dikkat et!)
+        
         rb = GetComponent<Rigidbody2D>();
         perceptron = GetComponent<AgentPerceptron_sc>();
         astar = GetComponent<AgentAStar_sc>();
         qlearning = GetComponent<AgentQLearning_sc>();
 
-        // Güvenlik Kontrolü: Eğer elle eklemeyi unuttuysan konsola hata bas
+        // Güvenlik Kontrolü
         if (rb == null || perceptron == null || astar == null || qlearning == null) {
             Debug.LogError("❌ EKSİK BİLEŞEN: Lütfen AgentPerceptron, AgentAStar ve AgentQLearning scriptlerini ajana eklediğinden emin ol!");
-            return; // Devam etme
+            return; 
         }
         
         // Modülleri Başlat
@@ -198,17 +197,17 @@ public class HierarchicalBrain_sc : MonoBehaviour {
         startTime = Time.time;
         if(perceptron) perceptron.FindEnemies(); 
         
-        // 1. Perceptron'a düşmanları tekrar buldur (Listeyi tazele)
+        // 1. Perceptron'a düşmanları tekrar buldur 
         if(perceptron) perceptron.FindEnemies(); 
         
         // 2. Ödülleri tekrar aktif et
         GameObject[] rewards = Resources.FindObjectsOfTypeAll<GameObject>();
         foreach (var go in rewards) if (go.CompareTag("Reward")) go.SetActive(true);
 
-        // ★★★ YENİ EKLENEN KISIM: DÜŞMANLARI BAŞA SAR ★★★
+        // DÜŞMANLARI BAŞA SAR 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject e in enemies) {
-            // Düşmanın üzerindeki reset scriptini al
+            
             EnemyReset_sc resetScript = e.GetComponent<EnemyReset_sc>();
             
             // Eğer script varsa çalıştır
@@ -216,27 +215,22 @@ public class HierarchicalBrain_sc : MonoBehaviour {
                 resetScript.ResetToStart();
             }
         }
-        // ★ İŞTE BU KISIM ★
+        
         if (move) {
              // Köşelerin Listesi:
              List<Vector2> corners = new List<Vector2> { 
-                 mapMax,                          // 1. Köşe
-                 new Vector2(mapMax.x, mapMin.y), // 2. Köşe
-                 new Vector2(mapMin.x, mapMax.y), // 3. Köşe
-                 mapMin                           // 4. Köşe
+                 mapMax,                          
+                 new Vector2(mapMax.x, mapMin.y), 
+                 new Vector2(mapMin.x, mapMax.y), 
+                 mapMin                         
              };
              
-             // Sıradaki köşeye git
              transform.position = corners[spawnIndex];
-             
-             // Sayacı 1 arttır (0 -> 1 -> 2 -> 3 -> 0 ...)
+            
              spawnIndex = (spawnIndex + 1) % 4;
         }
     }
 
-    // ====================================================
-    // ★ GUI KODLARI ★
-    // ====================================================
     void OnGUI() {
         GUIStyle s = new GUIStyle { fontSize = 20, fontStyle = FontStyle.Bold };
         int x = 15, y = 15, g = 26; s.normal.textColor = Color.cyan;
@@ -292,10 +286,6 @@ public class HierarchicalBrain_sc : MonoBehaviour {
         result.Apply();
         return result;
     }
-
-    // ====================================================
-    // ★ GIZMOS KODLARI ★
-    // ====================================================
     void OnDrawGizmos() {
         if (!Application.isPlaying) return;
 

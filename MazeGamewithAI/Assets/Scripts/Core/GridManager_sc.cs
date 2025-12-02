@@ -1,43 +1,35 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// A* algoritması için grid yönetimi
-/// Labirenti grid'e dönüştürür ve pathfinding yapar
-/// </summary>
 public class GridManager_sc : MonoBehaviour {
     [Header("Grid Ayarları")]
-    public LayerMask obstacleMask;              // "Obstacle" layer
-    public Vector2 gridWorldSize = new Vector2(20f, 11f); // Harita boyutu
+    public LayerMask obstacleMask;              
+    public Vector2 gridWorldSize = new Vector2(20f, 11f); 
     public float nodeRadius = 0.5f;
 
     Node_sc[,] grid;
     float nodeDiameter;
     int gridSizeX, gridSizeY;
 
-    // MazeGenerator labirenti oluşturduktan sonra çağırır
     public void CreateGrid() {
         nodeDiameter = nodeRadius * 2f;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
         
         grid = new Node_sc[gridSizeX, gridSizeY];
-        
-        // Haritanın sol alt köşesi
+   
         Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x / 2f - Vector3.up * gridWorldSize.y / 2f;
 
         for (int x = 0; x < gridSizeX; x++) {
             for (int y = 0; y < gridSizeY; y++) {
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.up * (y * nodeDiameter + nodeRadius);
-                
-                // Duvara çarpıyor mu kontrol et
+          
                 bool walkable = !Physics2D.OverlapCircle(worldPoint, nodeRadius - 0.1f, obstacleMask);
                 grid[x, y] = new Node_sc(walkable, worldPoint, x, y);
             }
         }
     }
 
-    // Dünya pozisyonundan grid node'unu bul
     public Node_sc NodeFromWorldPoint(Vector3 worldPosition) {
         float percentX = (worldPosition.x + gridWorldSize.x / 2f) / gridWorldSize.x;
         float percentY = (worldPosition.y + gridWorldSize.y / 2f) / gridWorldSize.y;
@@ -71,7 +63,6 @@ public class GridManager_sc : MonoBehaviour {
             openSet.Remove(currentNode);
             closedSet.Add(currentNode);
 
-            // Hedefe ulaştık
             if (currentNode == targetNode) {
                 return RetracePath(startNode, targetNode);
             }
@@ -92,10 +83,9 @@ public class GridManager_sc : MonoBehaviour {
                 }
             }
         }
-        return null; // Yol bulunamadı
+        return null; 
     }
 
-    // Yolu geri izle
     List<Node_sc> RetracePath(Node_sc startNode, Node_sc endNode) {
         List<Node_sc> path = new List<Node_sc>();
         Node_sc currentNode = endNode;
@@ -108,13 +98,13 @@ public class GridManager_sc : MonoBehaviour {
         return path;
     }
 
-    // Komşu node'ları bul (sadece 4 yön: yukarı, aşağı, sol, sağ)
+    // Sadece 4 yön: yukarı, aşağı, sol, sağ
     List<Node_sc> GetNeighbors(Node_sc node) {
         List<Node_sc> neighbors = new List<Node_sc>();
         
         for (int x = -1; x <= 1; x++) {
             for (int y = -1; y <= 1; y++) {
-                if (x == 0 && y == 0) continue; // Kendisi
+                if (x == 0 && y == 0) continue; 
                 if (Mathf.Abs(x) == 1 && Mathf.Abs(y) == 1) continue; // Çapraz hareket yok
 
                 int checkX = node.gridX + x;
@@ -128,17 +118,14 @@ public class GridManager_sc : MonoBehaviour {
         return neighbors;
     }
 
-    // İki node arası mesafe
+
     int GetDistance(Node_sc a, Node_sc b) {
     int dstX = Mathf.Abs(a.gridX - b.gridX);
     int dstY = Mathf.Abs(a.gridY - b.gridY);
     
-    // Çapraz gidemediğimiz için maliyet basitçe X + Y farkıdır.
-    // 10 ile çarpıyoruz ki tam sayı olsun.
     return 10 * (dstX + dstY);
 }
     
-    // Gizmo ile grid'i görselleştir
     void OnDrawGizmos() {
         Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, gridWorldSize.y, 1));
         

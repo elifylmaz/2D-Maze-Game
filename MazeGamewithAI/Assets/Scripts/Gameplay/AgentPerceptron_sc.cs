@@ -52,7 +52,7 @@ public class AgentPerceptron_sc : MonoBehaviour {
             return FindOpenDirection(bestDir);
         }
 
-        // Düşman yoksa ama duvarla burun burunaysak (Duvar Refleksi)
+        // Duvar Refleksi
         Vector2 currentDir = rb.velocity.normalized;
         if (currentDir != Vector2.zero && IsBlocked(currentDir)) return FindOpenDirection(currentDir);
 

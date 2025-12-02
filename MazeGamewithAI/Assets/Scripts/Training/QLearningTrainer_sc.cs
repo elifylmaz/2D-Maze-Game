@@ -3,26 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-/// <summary>
-/// FAZ 1: SADECE Q-LEARNING EĞİTİMİ
-/// Best Q-Table oluşturup kaydeder, sonra oyun kapanır
-/// Oyun mekaniği yok, tamamen eğitime odaklı
-/// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 public class QLearningTrainer_sc : MonoBehaviour {
     
     [Header("★ EĞİTİM AYARLARI ★")]
-    public string experimentName = "QLearning"; // Dosya adı karışmasın diye değiştirdim
-    public int maxEpisodes = 200;           // Biraz artırdık, öğrenmesi için zaman verelim
+    public string experimentName = "QLearning"; 
+    public int maxEpisodes = 200;          
     public int evaluateInterval = 20;       
     public int evaluateDuration = 2;        
 
     [Header("Q-Learning Parametreleri")]
     public float alpha = 0.2f;              
     public float gamma = 0.95f;             
-    public float epsilon = 1.0f;            // 1.0 İLE BAŞLAT (Mutlaka!)
+    public float epsilon = 1.0f;          
     public float minEpsilon = 0.01f;        
-    public float epsilonDecay = 0.995f;     // Biraz daha yavaş azalsın, daha çok gezsin
+    public float epsilonDecay = 0.995f;   
 
     [Header("Ortam Ayarları")]
     public float maxEpisodeDuration = 40f;  
@@ -32,12 +27,12 @@ public class QLearningTrainer_sc : MonoBehaviour {
 
     [Header("Ödül Değerleri")]
     public float rewardExit = 2000f;         
-    public float rewardCoinNear = 120f;     // Coin ödülünü artırdık (Çekici olsun)
+    public float rewardCoinNear = 120f;  
     public float rewardCoinFar = 80f;       
     public float penaltyEnemy = -200f;      
     public float penaltyWall = -2f;         
-    public float penaltyStep = -0.02f;       // Adım cezasını artırdık (Hareket etmese de zaman geçiyor)
-    public float penaltyTimeout = -300f;   // Timeout cezası arttı
+    public float penaltyStep = -0.02f;       
+    public float penaltyTimeout = -300f;  
     public float penaltyStuck = -5f; 
 
     // İç değişkenler
@@ -253,13 +248,13 @@ public class QLearningTrainer_sc : MonoBehaviour {
         qTable[s][a] += alpha * (r + gamma * maxQ - qTable[s][a]);
     }
 
-    // Shaping reward: Exit'e yaklaşma
+   
     float CalculateProgressReward() {
         if (exitTransform == null) return 0;
         float newDist = Vector2.Distance(transform.position, exitTransform.position);
         float progress = distanceToExit - newDist;
         UpdateDistanceToExit();
-        return progress * 1.0f; // 0.5f → 2.0f (Daha güçlü shaping)
+        return progress * 1.0f; 
     }
 
     void UpdateDistanceToExit() {
@@ -300,14 +295,14 @@ public class QLearningTrainer_sc : MonoBehaviour {
             reward = rewardExit;
             
             float time = Time.time - episodeStartTime;
-            if (time < 20f) reward += 50f; // Hızlı bonus
+            if (time < 20f) reward += 50f; 
             
             reset = true;
             result = "Basari";
             successCount++;
             consecutiveSuccess++;
             
-            // 5 arka arkaya başarı = epsilon düşür
+        
             if (consecutiveSuccess >= 5 && !isEvaluating) {
                 epsilon = Mathf.Max(minEpsilon, epsilon * 0.9f);
             }
@@ -347,7 +342,7 @@ public class QLearningTrainer_sc : MonoBehaviour {
             if (epsilon > minEpsilon) epsilon *= epsilonDecay;
         }
         
-        // Her 10 episode'da bir kaydet (Güvenlik için)
+        // Her 10 episode'da bir kaydet 
         if (episodeCount % 10 == 0) {
             SaveQTable();
             Debug.Log($"<color=cyan>💾 Q-Table kaydedildi (Episode {episodeCount}): {qTable.Count} state</color>");
@@ -440,7 +435,7 @@ public class QLearningTrainer_sc : MonoBehaviour {
         public float[] values;
     }
 
-    // GUI
+   
     void OnGUI() {
         GUIStyle s = new GUIStyle { fontSize = 22, fontStyle = FontStyle.Bold };
         s.normal.textColor = Color.white;

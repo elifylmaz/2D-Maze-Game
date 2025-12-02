@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Labirenti ve nesneleri oluşturur.
-/// Düzeltmeler: Düşman sınırları daraltıldı, duvar içi doğma engellendi, render sırası düzeltildi.
-/// </summary>
 public class MazeGenerator_sc : MonoBehaviour {
     [Header("Prefablar")]
     public GameObject wallPrefab; 
@@ -19,11 +15,10 @@ public class MazeGenerator_sc : MonoBehaviour {
     [Header("Düşman Ayarları")]
     public int enemyCount = 3; 
     
-    // ★ İSTEDİĞİN YENİ SINIRLAR ★
     public float minX = -7f, maxX = 7f;
     public float minY = -3f, maxY = 3f;
 
-    // Dengeli Z-Harita (20x11)
+    // Harita (20x11)
     // 0: Yol, 1: Duvar
     int[,] levelMap = {
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -83,7 +78,7 @@ public class MazeGenerator_sc : MonoBehaviour {
                     if (existingAgent == null && agentPrefab != null) {
                         GameObject ag = Instantiate(agentPrefab, pos, Quaternion.identity);
                         ag.tag = "Player";
-                        // Ajan en üstte görünsün
+                        
                         SetSortingOrder(ag, 20); 
                     } else if (existingAgent != null) {
                         existingAgent.transform.position = pos;
@@ -96,8 +91,6 @@ public class MazeGenerator_sc : MonoBehaviour {
                     wall.tag = "Wall";
                     wall.layer = LayerMask.NameToLayer("Obstacle"); 
                 } else {
-                    // ★ KRİTİK DÜZELTME: Sınır Kontrolü ★
-                    // Sadece senin belirlediğin alanın (minX, maxX...) İÇİNDEKİ boşlukları kaydet.
                     if (pos.x >= minX && pos.x <= maxX && pos.y >= minY && pos.y <= maxY) {
                         emptySpotsForEnemies.Add(pos);
                     }
@@ -112,7 +105,6 @@ public class MazeGenerator_sc : MonoBehaviour {
         if (enemyPrefab == null) return;
         int placedCount = 0;
 
-        // Sonsuz döngüye girmesin diye güvenlik sayacı (max 100 deneme)
         int safetyLoop = 0; 
 
         while (placedCount < enemyCount && safetyLoop < 100) {
@@ -123,31 +115,22 @@ public class MazeGenerator_sc : MonoBehaviour {
             int randomIndex = Random.Range(0, emptySpotsForEnemies.Count);
             Vector3 spawnPos = emptySpotsForEnemies[randomIndex];
             
-            // Listeden çıkar ki aynı yere koymasın
             emptySpotsForEnemies.RemoveAt(randomIndex); 
 
-            // ★ KRİTİK DÜZELTME: Fiziksel Duvar Kontrolü ★
-            // Grid boş dese bile, fiziksel olarak orada bir duvar collider'ı var mı?
-            // 0.4f yarıçapında bir daire çizip duvara çarpıyor mu bakıyoruz.
             if (Physics2D.OverlapCircle(spawnPos, 0.4f, LayerMask.GetMask("Obstacle")) != null) {
-                // Burada duvar var, burayı atla!
                 continue; 
             }
 
             GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
             newEnemy.tag = "Enemy";
 
-            // ★ GÖRSEL DÜZELTME: Sorting Order ★
-            // Düşmanı 10. katmana koyuyoruz (Ödüller 5 olacak). Düşman ödülün üstünde gözükür.
             SetSortingOrder(newEnemy, 10);
 
-            // Sınırları Ayarla
             RandomMover_sc mover = newEnemy.GetComponent<RandomMover_sc>();
             if (mover != null) {
                 mover.SetBoundaries(minX, maxX, minY, maxY);
             }
             
-            // Reset Scripti Ekle
             if (newEnemy.GetComponent<EnemyReset_sc>() == null) {
                 newEnemy.AddComponent<EnemyReset_sc>();
             }
@@ -173,8 +156,6 @@ public class MazeGenerator_sc : MonoBehaviour {
             GameObject reward = Instantiate(rewardPrefab, worldPos, Quaternion.identity);
             reward.tag = "Reward";
             
-            // ★ GÖRSEL DÜZELTME: Sorting Order ★
-            // Ödülleri 5. katmana koyuyoruz. (Düşman 10 olduğu için düşman üstte kalır)
             SetSortingOrder(reward, 5);
             
             RandomMover_sc mover = reward.GetComponent<RandomMover_sc>();
@@ -182,7 +163,7 @@ public class MazeGenerator_sc : MonoBehaviour {
         }
     }
 
-    // Yardımcı: Sprite Renderer Order Ayarlayıcı
+    // Sprite Renderer Order Ayarlayıcı
     void SetSortingOrder(GameObject obj, int order) {
         SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
         if (sr != null) {
